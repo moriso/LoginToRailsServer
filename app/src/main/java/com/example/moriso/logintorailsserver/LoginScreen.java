@@ -2,7 +2,6 @@ package com.example.moriso.logintorailsserver;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,20 +11,15 @@ import android.widget.EditText;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.transform.Result;
 
 public class LoginScreen extends ActionBarActivity {
 
@@ -79,22 +73,13 @@ public class LoginScreen extends ActionBarActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            HttpClient client = new DefaultHttpClient();
-            InputStream inputStream = null;
-            String result = "";
             try {
-                HttpResponse httpResponse = client.execute(new HttpGet("http://179.106.207.194:3000/segredos"));
-                inputStream = httpResponse.getEntity().getContent();
-
-                if (inputStream != null)
-                    result = convertInputStreamToString(inputStream);
-                else
-                    result = "Did not work!";
+                Document doc = Jsoup.connect("http://179.106.207.194:3000/segredos").get();
+                resultado = doc.title();
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            resultado = result;
             return null;
         }
 
@@ -103,21 +88,7 @@ public class LoginScreen extends ActionBarActivity {
             super.onPostExecute(aVoid);
             Intent intent = new Intent(LoginScreen.this, ListarSegredos.class);
             intent.putExtra("resultado",resultado);
-            System.out.println(resultado);
             startActivity(intent);
         }
-}
-
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
-        String result = "";
-        while((line = bufferedReader.readLine()) != null) {
-            result += line;
-        }
-        inputStream.close();
-        return result;
-
     }
-
 }
